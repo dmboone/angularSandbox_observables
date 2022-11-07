@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { interval, Subscription } from 'rxjs';
+import { interval, Subscription, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -13,8 +13,20 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor() { }
 
   ngOnInit() {
-    this.firstObsSubscription = interval(1000).subscribe(count => { // will start a new one every time you go to the home page, which creates memory leaks!
-      console.log(count);
+    // this.firstObsSubscription = interval(1000).subscribe(count => { // will start a new one every time you go to the home page, which creates memory leaks!
+    //   console.log(count);
+    // });
+
+    const customIntervalObservable = Observable.create(observer =>{ // creating a custom observable that will do the same as the one above
+      let count = 0;
+      setInterval(() => {
+        observer.next(count); // emits a new value
+        count++;
+      }, 1000);
+    });
+
+    this.firstObsSubscription = customIntervalObservable.subscribe(data => { // make sure to unsubscribe in OnDestroy to avoid memory leak
+      console.log(data);
     });
   }
 
