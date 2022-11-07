@@ -1,4 +1,4 @@
-# FirstApp
+# angularSandbox_observables
 
 Practicing observables in Angular.
 
