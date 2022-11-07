@@ -20,14 +20,29 @@ export class HomeComponent implements OnInit, OnDestroy {
     const customIntervalObservable = Observable.create(observer =>{ // creating a custom observable that will do the same as the one above
       let count = 0;
       setInterval(() => {
-        observer.next(count); // emits a new value
+        observer.next(count); // emits a new value; this is the event data we can access when we subscribe to the observable
+        if(count === 2){
+          observer.complete(); // observable will stop
+        }
+        if(count > 3){ // creating a fake error here
+          observer.error(new Error('Count is greater than 3!')); // this will cancel the observable altogether; not the same as complete
+        }
         count++;
       }, 1000);
     });
 
-    this.firstObsSubscription = customIntervalObservable.subscribe(data => { // make sure to unsubscribe in OnDestroy to avoid memory leak
-      console.log(data);
-    });
+    this.firstObsSubscription = customIntervalObservable.subscribe(
+      data => { // this is the event data released by the observable (observer.next(data)); make sure to unsubscribe in OnDestroy to avoid memory leak
+      console.log(data); // this runs as long as the observable is still running
+      },
+      error => { // this will run if the observer gives an error (observer.error(...)), so how we handle errors from our observer; do not need to unsubscribe if observable gives an error, but still do 
+        console.log(error); // console log the error data as defined in the observable
+        alert(error.message); // send an alert with the error data
+      },
+      () => { // this will run if our observer completes (observer.complete()); do not need to unsubscribe if observable completes, but still do
+        console.log('Completed!');
+      }
+    );
   }
 
   ngOnDestroy(){
